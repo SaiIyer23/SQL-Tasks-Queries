@@ -1,0 +1,277 @@
+Question 1: List Employee Name, Department Name, and Location Name
+Category: SQL
+
+Solution:
+SELECT e.employee_name,
+       d.dept_name,
+       d.location_id
+FROM Employees e
+JOIN Departments d
+ON e.dept_id = d.dept_id;
+
+================================================================================
+
+Question 2: Project Name, Client Name, Total Hours Worked
+Category: SQL
+
+Solution:
+SELECT p.project_name,
+       p.client_name,
+       SUM(a.hours_worked) AS total_hours
+FROM Projects p
+JOIN Assignments a
+ON p.project_id = a.project_id
+JOIN Departments d
+ON p.dept_id = d.dept_id
+WHERE d.dept_name = 'Consulting'
+GROUP BY p.project_name, p.client_name;
+
+
+================================================================================
+
+Question 3: Employees who worked on GlobalTech Solutions projects
+Category: SQL
+
+Solution:
+SELECT e.employee_name,
+       p.project_name
+FROM Employees e
+JOIN Assignments a
+ON e.employee_id = a.employee_id
+JOIN Projects p
+ON a.project_id = p.project_id
+WHERE p.client_name = 'GlobalTech Solutions';
+
+================================================================================
+
+Question 4: Departments with no employees
+Category: SQL
+
+Solution:
+SELECT d.dept_name
+FROM Departments d
+LEFT JOIN Employees e
+ON d.dept_id = e.dept_id
+WHERE e.employee_id IS NULL;
+
+================================================================================
+
+Question 5: Manager Name, Department Name, total direct reports
+Category: SQL
+
+Solution:
+SELECT m.employee_name AS manager_name,
+       d.dept_name,
+       COUNT(e.employee_id) AS direct_reports
+FROM Employees e
+JOIN Employees m
+ON e.manager_id = m.employee_id
+JOIN Departments d
+ON m.dept_id = d.dept_id
+GROUP BY m.employee_name, d.dept_name;
+
+================================================================================
+
+Question 6: Average Hours Worked per Employee
+Category: SQL
+
+Solution:
+SELECT e.employee_name,
+       AVG(a.hours_worked) AS avg_hours
+FROM Employees e
+JOIN Assignments a
+ON e.employee_id = a.employee_id
+GROUP BY e.employee_name;
+
+================================================================================
+
+Question 7: Departments with avg salary above company avg salary
+Category: SQL
+
+Solution:
+SELECT d.dept_name,
+       AVG(e.salary) AS dept_avg_salary
+FROM Employees e
+JOIN Departments d
+ON e.dept_id = d.dept_id
+GROUP BY d.dept_name
+HAVING AVG(e.salary) >
+(
+    SELECT AVG(salary)
+    FROM Employees
+);
+
+================================================================================
+
+Question 8: Clients whose projects exceed 500 total hours
+Category: SQL
+
+Solution:
+SELECT p.client_name,
+       SUM(a.hours_worked) AS total_hours
+FROM Projects p
+JOIN Assignments a
+ON p.project_id = a.project_id
+GROUP BY p.client_name
+HAVING SUM(a.hours_worked) > 500;
+
+================================================================================
+
+Question 9: Department with highest employee count per location
+Category: SQL
+
+Solution:
+SELECT location_id,
+       dept_name,
+       employee_count
+FROM
+(
+    SELECT d.location_id,
+           d.dept_name,
+           COUNT(e.employee_id) AS employee_count,
+           RANK() OVER
+           (
+               PARTITION BY d.location_id
+               ORDER BY COUNT(e.employee_id) DESC
+           ) AS rnk
+    FROM Departments d
+    LEFT JOIN Employees e
+    ON d.dept_id = e.dept_id
+    GROUP BY d.location_id, d.dept_name
+) x
+WHERE rnk = 1;
+
+================================================================================
+
+Question 10: Projects with more than 5 employees assigned
+Category: SQL
+
+Solution:
+SELECT p.project_name,
+       COUNT(DISTINCT a.employee_id) AS total_employees
+FROM Projects p
+JOIN Assignments a
+ON p.project_id = a.project_id
+GROUP BY p.project_name
+HAVING COUNT(DISTINCT a.employee_id) > 5;
+
+================================================================================
+
+Question 11: Employees working on ALL R&D department projects
+Category: SQL
+
+Solution:
+SELECT e.employee_name
+FROM Employees e
+WHERE NOT EXISTS
+(
+    SELECT p.project_id
+    FROM Projects p
+    JOIN Departments d
+    ON p.dept_id = d.dept_id
+    WHERE d.dept_name = 'R&D'
+    AND NOT EXISTS
+    (
+        SELECT *
+        FROM Assignments a
+        WHERE a.employee_id = e.employee_id
+        AND a.project_id = p.project_id
+    )
+);
+
+================================================================================
+
+Question 12: Departments with employees assigned to more than one project
+Category: SQL
+
+Solution:
+SELECT d.dept_name
+FROM Departments d
+JOIN Employees e
+ON d.dept_id = e.dept_id
+JOIN Assignments a
+ON e.employee_id = a.employee_id
+GROUP BY d.dept_name
+HAVING COUNT(DISTINCT a.project_id) > 1;
+
+================================================================================
+
+Question 13: Employees who worked less than 10 hours
+Category: SQL
+
+Solution:
+SELECT e.employee_name,
+       p.project_name
+FROM Employees e
+JOIN Assignments a
+ON e.employee_id = a.employee_id
+JOIN Projects p
+ON a.project_id = p.project_id
+WHERE a.hours_worked < 10;
+
+================================================================================
+
+Question 14: Projects with no assigned employees
+Category: SQL
+
+Solution:
+SELECT p.project_name
+FROM Projects p
+LEFT JOIN Assignments a
+ON p.project_id = a.project_id
+WHERE a.assignment_id IS NULL;
+
+================================================================================
+
+Question 15: Employees whose salary is greater than max salary in own dept
+Category: SQL
+
+Solution:
+SELECT e.employee_name,
+       e.salary
+FROM Employees e
+WHERE e.salary >
+(
+    SELECT MAX(e2.salary)
+    FROM Employees e2
+    WHERE e2.dept_id = e.dept_id
+    AND e2.employee_id <> e.employee_id
+);
+
+
+================================================================================
+
+Question 16: Employee Name and oldest project start date
+Category: SQL
+
+Solution:
+SELECT e.employee_name,
+       MIN(a.start_date) AS oldest_project_date
+FROM Employees e
+JOIN Assignments a
+ON e.employee_id = a.employee_id
+GROUP BY e.employee_name;
+
+================================================================================
+
+Question 17: Projects active in year 2023 using DATE_FORMAT
+Category: SQL
+
+Solution:
+SELECT project_name,
+       start_date
+FROM Projects
+WHERE DATE_FORMAT(start_date, '%Y') = '2023';
+
+================================================================================
+
+Question 18: IFNULL for employees without managers
+Category: SQL
+
+Solution:
+SELECT employee_name,
+       IFNULL(CAST(manager_id AS CHAR), 'CEO') AS manager
+FROM Employees;
+
+================================================================================
+

@@ -1,0 +1,271 @@
+Question 1: Employee name with job title and department name
+Category: JOINS
+
+Solution:
+SELECT e.name, j.job_title, d.dept_name
+FROM Employees e
+JOIN Jobs j ON e.job_id = j.job_id
+JOIN Departments d ON e.dept_id = d.dept_id;
+
+================================================================================
+
+Question 2: Employees earning more than average IT salary
+Category: SUBQUERY
+
+Solution:
+SELECT name, salary
+FROM Employees
+WHERE salary >
+(
+    SELECT AVG(salary)
+    FROM Employees
+    WHERE dept_id =
+    (
+        SELECT dept_id
+        FROM Departments
+        WHERE dept_name = 'IT'
+    )
+);
+
+================================================================================
+
+Question 3: Total salary expenditure per department
+Category: GROUP BY
+
+Solution:
+SELECT d.dept_name, SUM(e.salary) AS total_salary
+FROM Employees e
+JOIN Departments d ON e.dept_id = d.dept_id
+GROUP BY d.dept_name;
+
+================================================================================
+
+Question 4: Departments with >2 employees and avg salary >70000
+Category: HAVING
+
+Solution:
+SELECT d.dept_name,
+       COUNT(e.emp_id) AS total_employees,
+       AVG(e.salary) AS avg_salary
+FROM Employees e
+JOIN Departments d ON e.dept_id = d.dept_id
+GROUP BY d.dept_name
+HAVING COUNT(e.emp_id) > 2
+   AND AVG(e.salary) > 70000;
+
+================================================================================
+
+Question 5: Employee names with manager names
+Category: SELF JOIN
+
+Solution:
+SELECT e.name AS employee,
+       m.name AS manager
+FROM Employees e
+LEFT JOIN Employees m
+ON e.manager_id = m.emp_id;
+
+================================================================================
+
+Question 6: Top 3 highest-paid employees
+Category: ORDER BY
+
+Solution:
+SELECT name, salary
+FROM Employees
+ORDER BY salary DESC
+LIMIT 3;
+
+================================================================================
+
+Question 7: Developers working in San Francisco
+Category: JOINS + WHERE
+
+Solution:
+SELECT e.name
+FROM Employees e
+JOIN Jobs j ON e.job_id = j.job_id
+JOIN Departments d ON e.dept_id = d.dept_id
+WHERE j.job_title = 'Developer'
+  AND d.location = 'San Francisco';
+
+================================================================================
+
+Question 8: Number of employees hired each year
+Category: GROUP BY
+
+Solution:
+SELECT YEAR(hire_date) AS hire_year,
+       COUNT(*) AS total_employees
+FROM Employees
+GROUP BY YEAR(hire_date)
+ORDER BY hire_year;
+
+================================================================================
+
+Question 9: Job titles where max employee salary <100000
+Category: HAVING
+
+Solution:
+SELECT j.job_title,
+       MAX(e.salary) AS max_salary
+FROM Employees e
+JOIN Jobs j ON e.job_id = j.job_id
+GROUP BY j.job_title
+HAVING MAX(e.salary) < 100000;
+
+================================================================================
+
+Question 10: Employees in same department as David
+Category: SUBQUERY
+
+Solution:
+SELECT name
+FROM Employees
+WHERE dept_id =
+(
+    SELECT dept_id
+    FROM Employees
+    WHERE name = 'David'
+);
+
+================================================================================
+
+Question 11: All departments even without employees
+Category: MULTI-TABLE JOIN
+
+Solution:
+SELECT d.dept_name,
+       e.name
+FROM Departments d
+LEFT JOIN Employees e
+ON d.dept_id = e.dept_id;
+
+================================================================================
+
+Question 12: Hired between 2018 and 2020 and salary >60000
+Category: COMPLEX FILTER
+
+Solution:
+SELECT name, salary, hire_date
+FROM Employees
+WHERE hire_date BETWEEN '2018-01-01' AND '2020-12-31'
+  AND salary > 60000;
+
+================================================================================
+
+Question 13: Employees earning above dept average
+Category: CORRELATED SUBQUERY
+
+Solution:
+SELECT e1.name,
+       e1.salary,
+       e1.dept_id
+FROM Employees e1
+WHERE e1.salary >
+(
+    SELECT AVG(e2.salary)
+    FROM Employees e2
+    WHERE e1.dept_id = e2.dept_id
+);
+
+================================================================================
+
+Question 14: Job title and salary of employee with ID 504
+Category: JOINS
+
+Solution:
+SELECT e.name,
+       j.job_title,
+       e.salary
+FROM Employees e
+JOIN Jobs j
+ON e.job_id = j.job_id
+WHERE e.emp_id = 504;
+
+================================================================================
+
+Question 15: Minimum salary under each manager
+Category: GROUP BY
+
+Solution:
+SELECT manager_id,
+       MIN(salary) AS min_salary
+FROM Employees
+WHERE manager_id IS NOT NULL
+GROUP BY manager_id;
+
+================================================================================
+
+Question 16: Departments without Analysts
+Category: 
+
+Solution:
+SELECT dept_name
+FROM Departments
+WHERE dept_id NOT IN
+(
+    SELECT DISTINCT e.dept_id
+    FROM Employees e
+    JOIN Jobs j
+    ON e.job_id = j.job_id
+    WHERE j.job_title = 'Analyst'
+);
+
+================================================================================
+
+Question 17: Difference between highest and lowest salary
+
+
+Solution:
+SELECT MAX(salary) - MIN(salary) AS salary_difference
+FROM Employees;
+
+================================================================================
+
+Question 18: Employees sorted by dept and salary
+
+
+Solution:
+SELECT e.name,
+       e.hire_date,
+       d.dept_name,
+       e.salary
+FROM Employees e
+JOIN Departments d
+ON e.dept_id = d.dept_id
+ORDER BY d.dept_name ASC,
+         e.salary DESC;
+
+================================================================================
+
+Question 19: Managers managing more than 2 employees
+
+
+Solution:
+SELECT manager_id,
+       COUNT(*) AS total_people
+FROM Employees
+WHERE manager_id IS NOT NULL
+GROUP BY manager_id
+HAVING COUNT(*) > 2;
+
+================================================================================
+
+Question 20: Employee(s) with third-highest salary
+Category: SUBQUERY
+
+Solution:
+SELECT name, salary
+FROM Employees
+WHERE salary =
+(
+    SELECT DISTINCT salary
+    FROM Employees
+    ORDER BY salary DESC
+    LIMIT 1 OFFSET 2
+);
+
+================================================================================
+
+
